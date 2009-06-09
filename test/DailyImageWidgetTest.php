@@ -94,7 +94,7 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     
     $this->assertTrue(!empty($result));
     
-    $this->assertTrue(($xml = _to_xml($result)) !== false);
+    $this->assertTrue(($xml = _to_xml($result, true)) !== false);
     foreach ($xpath_tests as $xpath => $result) {
       $this->assertTrue(_xpath_test($xml, $xpath, $result), $xpath);
     }
@@ -117,6 +117,56 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     update_option('hubblesite-daily-image-options', $options);
     
     $this->assertEquals($result, $this->diw->get_display_options());
+  }
+  
+  function providerTestParseBadXML() {
+    return array(
+      array(null),
+      array(false),
+      array("<xml"),
+      array("<xml></yml>")
+    );
+  }
+  
+  /**
+   * @dataProvider providerTestParseBadXML
+   */
+  function testParseBadXML($xml) {
+    foreach (array(true, false) as $simplexml) {
+      $this->diw->has_simplexml = $simplexml;
+
+      $this->assertFalse($this->diw->parse_xml($xml));
+    }    
+  }
+  
+  function testParseXML() {
+    foreach (array(true, false) as $simplexml) {
+      $this->diw->has_simplexml = $simplexml;
+      
+      $result = $this->diw->parse_xml(
+        "<gallery>" .
+          "<title>title</title>" .
+          "<caption>caption</caption>" .
+          "<date>12345</date>" .
+          "<image_url>image_url</image_url>" .
+          "<gallery_url>gallery_url</gallery_url>" .
+          "<credits>credits</credits>" .
+        "</gallery>"
+      );
+      
+      $this->assertEquals(
+        array(
+          'title' => 'title',
+          'caption' => 'caption',
+          'date' => '12345',
+          'image_url' => 'image_url',
+          'gallery_url' => 'gallery_url',
+          'credits' => 'credits'
+        ),
+        $result,
+        "simplexml? $simplexml"
+      );
+    }
   }
 }
 

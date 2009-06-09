@@ -6,9 +6,19 @@ class DailyImageWidget {
       'title',
       'image',
       'styles'
-    ); 
+    );
+    
+    $this->data_source = "http://hubblesite.org/gallery/album/daily_image.php";
+    $this->data = false;
+    
+    $this->has_simplexml = class_exists('SimpleXMLElement');
+    
+    $this->_valid_column_names = array('title', 'caption', 'date', 'image_url', 'gallery_url', 'credits');
   }
   
+  /**
+   * Get the list of display options from the WordPress options database.
+   */
   function get_display_options() {
     $display_options = get_option('hubblesite-daily-image-options');
     $this->display_options = array();
@@ -26,6 +36,9 @@ class DailyImageWidget {
     return $this->display_options;
   }
   
+  /**
+   * Render the widget.
+   */
   function render() {
     if (!empty($this->data) && is_array($this->data)) {
       $options = $this->get_display_options();
@@ -62,6 +75,72 @@ class DailyImageWidget {
         echo '</style>';
       }
     }
+  }
+  
+  /**
+   * Parse a string of XML from the HubbleSite Daily Gallery Image feed.
+   */
+  function parse_xml($xml_text) {
+    if ($this->has_simplexml) {
+      try {
+        $xml = new SimpleXMLElement($xml_text);
+
+        if ($xml !== false) {
+          $data = array();
+          $is_valid = true;
+          foreach ($this->_valid_column_names as $node) {
+            if ($xml->{$node}) {
+              $data[$node] = (string)$xml->{$node}; 
+            } else {
+              $is_valid = false; break; 
+            }
+          }
+          
+          if ($is_valid) {
+            $this->data = $data; 
+          } else {
+            $this->data = false; 
+          }
+        }
+      } catch (Exception $e) {
+        $this->data = false; 
+      }
+    } else {
+      $parser = xml_parser_create();
+      $this->_character_data = "";
+      $this->_xml_data = array();
+      xml_set_element_handler(
+        $parser,
+        array($this, "_start_element_handler"),
+        array($this, "_end_element_handler")
+      );
+      xml_set_character_data_handler($parser, array($this, "_character_data_handler"));
+      xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+      $this->data = false;
+      if (xml_parse($parser, $xml_text)) {
+        if (count($this->_xml_data) == count($this->_valid_column_names)) {
+          $this->data = $this->_xml_data; 
+        }
+      }
+    }
+    return $this->data;
+  }
+  
+  function _start_element_handler($parser, $name, $attributes) {
+    $this->_character_data = ""; 
+  }
+  
+  function _end_element_handler($parser, $name) {
+    $name = strtolower($name);
+    if (in_array($name, $this->_valid_column_names)) {
+      $this->_xml_data[$name] = $this->_character_data;
+    }
+              
+    $this->_character_data = "";
+  }
+  
+  function _character_data_handler($parser, $data) {
+    $this->_character_data .= $data;
   }
 }
 

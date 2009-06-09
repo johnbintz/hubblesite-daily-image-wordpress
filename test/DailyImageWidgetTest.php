@@ -2,7 +2,7 @@
 
 require_once('PHPUnit/Framework.php');
 require_once(dirname(__FILE__) . '/../classes/DailyImageWidget.php');
-require_once(dirname(__FILE__) . '/../../wordpress-phpunit-mocks/wordpress-phpunit-mocks.php');
+require_once(dirname(__FILE__) . '/../../mockpress/mockpress.php');
 
 class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
   function setUp() {

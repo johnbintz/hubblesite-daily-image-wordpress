@@ -8,12 +8,24 @@ class DailyImageWidget {
       'styles'
     );
     
+    $this->_cache_time = 86400;
+    
     $this->data_source = "http://hubblesite.org/gallery/album/daily_image.php";
     $this->data = false;
     
     $this->has_simplexml = class_exists('SimpleXMLElement');
     
     $this->_valid_column_names = array('title', 'caption', 'date', 'image_url', 'gallery_url', 'credits');
+    $this->_valid_options = array(
+      "image"   => "Daily Image",
+      "title"   => "Image Title",
+      "caption" => "Image Caption",
+      "credits" => "Credits",
+      "styles" => "HubbleSite Styles",
+    );
+    
+    wp_register_sidebar_widget("hubblesite-daily-image", "HubbleSite Daily Image", array($this, "render"));
+    register_widget_control("hubblesite-daily-image", array($this, "render_ui"));
   }
   
   /**
@@ -23,10 +35,7 @@ class DailyImageWidget {
     $display_options = get_option('hubblesite-daily-image-options');
     $this->display_options = array();
     if (!empty($display_options)) {
-      $this->display_options = array_intersect(
-        explode(",", $display_options),
-        array("title", "image", "styles", "caption", "credits")
-      );
+      $this->display_options = array_intersect(explode(",", $display_options), array_keys($this->_valid_options));
     }
     
     if (empty($this->display_options)) {
@@ -74,6 +83,17 @@ class DailyImageWidget {
           echo "div#hubblesite-daily-image { text-align: center }";
         echo '</style>';
       }
+    }
+  }
+  
+  function render_ui() {
+    echo "<p>Show on Widget:</p>";
+    
+    foreach ($this->_valid_options as $option => $label) {
+      echo "<label>";
+        echo "<input type=\"checkbox\" name=\"hubblesite[${option}]\" />";
+        echo $label;
+      echo "</label>";
     }
   }
   
@@ -141,6 +161,22 @@ class DailyImageWidget {
   
   function _character_data_handler($parser, $data) {
     $this->_character_data .= $data;
+  }
+  
+  function _get_cached_data() {
+    $result = get_option('hubblesite-daily-image-cache');
+    
+    if (is_string($result)) {
+      if (($data = @unserialize($result)) !== false) {
+        list($timestamp, $cached_data) = $data;
+        
+        if (($timestamp + $this->_cache_time) > time()) {
+          $is_valid = (count(array_intersect()) == count($this->_valid_column_names));
+          
+        }
+      }
+    }
+    return false;
   }
 }
 

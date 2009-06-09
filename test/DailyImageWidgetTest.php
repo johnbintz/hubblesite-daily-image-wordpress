@@ -6,9 +6,11 @@ require_once(dirname(__FILE__) . '/../../mockpress/mockpress.php');
 
 class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
   function setUp() {
+    _reset_wp();
+    
     $this->diw = new DailyImageWidget();
     
-    $this->diw->data = array(
+    $this->sample_data = array(
       'title' => 'title',
       'caption' => 'caption',
       'date' => '12345',
@@ -17,7 +19,13 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
       'credits' => 'credits'
     );
     
-    _reset_wp();
+    $this->diw->data = $this->sample_data;    
+  }
+
+  function testWidgetRegistered() {
+     global $wp_test_expectations;     
+     $this->assertEquals("hubblesite-daily-image", $wp_test_expectations['sidebar_widgets'][0]['id']);
+     $this->assertEquals("hubblesite-daily-image", $wp_test_expectations['widget_controls'][0]['name']);
   }
 
   function providerTestRetrieveJunkData() {
@@ -155,18 +163,40 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
       );
       
       $this->assertEquals(
-        array(
-          'title' => 'title',
-          'caption' => 'caption',
-          'date' => '12345',
-          'image_url' => 'image_url',
-          'gallery_url' => 'gallery_url',
-          'credits' => 'credits'
-        ),
+        $this->sample_data,
         $result,
         "simplexml? $simplexml"
       );
     }
+  }
+  
+  function testWidgetUI() {
+    ob_start();
+    $this->diw->render_ui();
+    $result = ob_get_clean();
+    
+    $this->assertTrue(!empty($result));
+    
+    $this->assertTrue(($xml = _to_xml($result, true)) !== false);
+    foreach ($this->diw->_valid_options as $option => $label) {
+      $xpath = "//label[contains(text(), '${label}')]";      
+      $this->assertTrue(_xpath_test($xml, $xpath, true), $xpath);
+    }    
+  }
+  
+  function testGetCachedData() {
+    $test_time = time() + 86500;
+    update_option('hubblesite-daily-image-cache', serialize(array($test_time, $this->sample_data)));
+    $this->assertEquals(array($test_time, $this->sample_data), $this->diw->_get_cached_data());
+
+    $test_time = time() - 86500;
+    update_option('hubblesite-daily-image-cache', serialize(array($test_time, $this->sample_data)));
+    $this->assertEquals(false, $this->diw->_get_cached_data());
+
+    update_option('hubblesite-daily-image-cache', null);
+    $this->assertEquals(false, $this->diw->_get_cached_data());
+    
+    $this->markTestIncomplete();
   }
 }
 

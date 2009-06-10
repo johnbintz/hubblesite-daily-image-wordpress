@@ -1,7 +1,7 @@
 <?php
 
 class DailyImageWidget {
-  function DailyImageWidget() {
+  function DailyImageWidget($skip_load_data = false) {
     $this->default_display_options = array(
       'title',
       'image',
@@ -11,23 +11,61 @@ class DailyImageWidget {
     $this->_cache_time = 86400;
     
     $this->data_source = "http://hubblesite.org/gallery/album/daily_image.php";
-    $this->data = false;
     
     $this->has_simplexml = class_exists('SimpleXMLElement');
     
     $this->_valid_column_names = array('title', 'caption', 'date', 'image_url', 'gallery_url', 'credits');
     $this->_valid_options = array(
-      "image"   => "Daily Image",
-      "title"   => "Image Title",
-      "caption" => "Image Caption",
-      "credits" => "Credits",
-      "styles" => "HubbleSite Styles",
+      "image"   => __("Daily Image", "hubblesite-daily-image-widget"),
+      "title"   => __("Image Title", "hubblesite-daily-image-widget"),
+      "caption" => __("Image Caption", "hubblesite-daily-image-widget"),
+      "credits" => __("Credits", "hubblesite-daily-image-widget"),
+      "styles"  => __("HubbleSite Styles", "hubblesite-daily-image-widget"),
     );
     
-    wp_register_sidebar_widget("hubblesite-daily-image", "HubbleSite Daily Image", array($this, "render"));
-    register_widget_control("hubblesite-daily-image", array($this, "render_ui"));
+    add_action('init', array($this, "_init"));
+    
+    if (!$skip_load_data) {
+      if (!$this->_load_data()) {
+        add_action("admin_notices", array($this, "_connection_warning"));
+      }
+    } else {
+      $this->data = false;
+    }
+    
+    $this->display_options = $this->get_display_options();
   }
   
+  function _init() {
+    register_sidebar_widget(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render"));  
+    register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render_ui"));  
+  }
+  
+  function _connection_warning() {
+    echo "<div class=\"updated fade\">";
+      _e("<strong>HubbleSite Daily Image Widget</strong> was unable to retrieve new data from HubbleSite.", "hubblesite-daily-image-widget");
+      _e("The widget will appear as empty in your site until data can be downloaded again.", "hubblesite-daily-image-widget");
+    echo "</div>";
+  }
+  
+  function _get_from_data_source() {
+    return @file_get_contents($this->data_source);
+  }
+
+  function _load_data() {
+    if (($result = $this->_get_cached_data()) === false) {
+      if (($xml_text = $this->_get_from_data_source()) !== false) {
+        if (($result = $this->parse_xml($xml_text)) !== false) {
+          update_option('hubblesite-daily-image-cache', array(time(), $result));
+          return true;
+        }
+      }
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   /**
    * Get the list of display options from the WordPress options database.
    */
@@ -41,6 +79,8 @@ class DailyImageWidget {
     if (empty($this->display_options)) {
       $this->display_options = $this->default_display_options;
     }
+
+    update_option('hubblesite-daily-image-options', implode(",", $this->display_options));
 
     return $this->display_options;
   }
@@ -87,13 +127,16 @@ class DailyImageWidget {
   }
   
   function render_ui() {
-    echo "<p>Show on Widget:</p>";
+    echo "<p>";
+      _e("Show on Widget:", "hubblesite-daily-image-widget");
+    echo "</p>";
     
     foreach ($this->_valid_options as $option => $label) {
       echo "<label>";
         echo "<input type=\"checkbox\" name=\"hubblesite[${option}]\" />";
         echo $label;
       echo "</label>";
+      echo "<br />";
     }
   }
   
@@ -176,7 +219,10 @@ class DailyImageWidget {
             if (!isset($cached_data[$field])) { $is_valid = false; break; }
           }
           
-          return ($is_valid) ? $cached_data : false;
+          if ($is_valid) {
+            $this->data = $cached_data;
+            return $cached_data;
+          }
         }
       }
     }

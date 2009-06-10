@@ -32,13 +32,14 @@ class DailyImageWidget {
     } else {
       $this->data = false;
     }
-    
-    $this->display_options = $this->get_display_options();
   }
   
   function _init() {
     register_sidebar_widget(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render"));  
     register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render_ui"));  
+    
+    $this->handle_post();
+    $this->get_display_options();
   }
   
   function _connection_warning() {
@@ -63,6 +64,21 @@ class DailyImageWidget {
       return false;
     } else {
       return true;
+    }
+  }
+
+  function handle_post() {
+    if (isset($_POST['hubblesite']['_wpnonce'])) {
+      if (wp_verify_nonce($_POST['hubblesite']['_wpnonce'], 'hubble')) {
+        $options = array();
+        foreach ($this->_valid_options as $option => $label) {
+          if (isset($_POST['hubblesite'][$option])) {
+            $options[] = $option;
+          }
+        }
+        $this->display_options = $options;
+        update_option('hubblesite-daily-image-options', implode(",", $this->display_options));
+      }
     }
   }
 
@@ -127,13 +143,14 @@ class DailyImageWidget {
   }
   
   function render_ui() {
+    echo "<input type=\"hidden\" name=\"hubblesite[_wpnonce]\" value=\"" . wp_create_nonce('hubble') . "\" />";
     echo "<p>";
-      _e("Show on Widget:", "hubblesite-daily-image-widget");
+      _e("Show on Widget <em>(must select at least one)</em>:", "hubblesite-daily-image-widget");
     echo "</p>";
     
     foreach ($this->_valid_options as $option => $label) {
       echo "<label>";
-        echo "<input type=\"checkbox\" name=\"hubblesite[${option}]\" />";
+        echo "<input type=\"checkbox\" name=\"hubblesite[${option}]\" " . (in_array($option, $this->display_options) ? "checked=\"checked\"" : "") . "/> ";
         echo $label;
       echo "</label>";
       echo "<br />";

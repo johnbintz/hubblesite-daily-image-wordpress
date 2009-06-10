@@ -8,6 +8,8 @@ require_once(dirname(__FILE__) . '/../../mockpress/mockpress.php');
 class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
   function setUp() {
     _reset_wp();
+    wp_create_nonce("hubble");
+    $_POST = array();
     
     $this->diw = new DailyImageWidget(true);
     
@@ -133,6 +135,70 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(get_option('hubblesite-daily-image-options') !== false);
   }
   
+  function testCheckedOptions() {
+    $this->diw->display_options = array_keys($this->diw->_valid_options);
+    
+    ob_start();
+    $this->diw->render_ui();
+    $result = ob_get_clean();
+    
+    $this->assertTrue(($xml = _to_xml($result, true)) !== false);
+    
+    foreach ($this->diw->display_options as $option) {
+      $this->assertTrue(_node_exists($xml, '//input[@name="hubblesite[' . $option . ']" and @checked="checked"]'));
+    }
+  }
+  
+  function providerTestUpdateOptions() {
+    $d = new DailyImageWidget(true);
+    $default_display_options = $d->default_display_options;
+
+    return array(
+      array(
+        array(),
+        $default_display_options
+      ),
+      array(
+        array(
+          'save-widgets' => "yes"
+        ),
+        $default_display_options
+      ),
+      array(
+        array(
+          'hubblesite' => array(
+            '_wpnonce' => "~*NONCE*~"
+          )
+        ),
+        $default_display_options
+      ),
+      array(
+        array(
+          'hubblesite' => array(
+            '_wpnonce' => "~*NONCE*~",
+            'credits' => "yes"
+          )
+        ),
+        array("credits")
+      ),
+    );
+  }
+  
+  /**
+   * @dataProvider providerTestUpdateOptions
+   */
+  function testUpdateOptions($post, $result) {   
+    $_POST = $post;
+    
+    if (isset($_POST['hubblesite']['_wpnonce'])) {
+      $_POST['hubblesite']['_wpnonce'] = _get_nonce('hubble');
+    }
+    
+    $this->diw->handle_post();
+    $this->diw->get_display_options();
+    $this->assertEquals($result, $this->diw->display_options);
+  }
+  
   function providerTestParseBadXML() {
     return array(
       array(null),
@@ -187,7 +253,13 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     foreach ($this->diw->_valid_options as $option => $label) {
       $xpath = "//label[contains(text(), '${label}')]";      
       $this->assertTrue(_xpath_test($xml, $xpath, true), $xpath);
-    }    
+    }
+    
+    foreach (array(
+      '//input[@type="hidden" and @name="hubblesite[_wpnonce]"]' => true
+    ) as $xpath => $value) {
+      $this->assertTrue(_xpath_test($xml, $xpath, $value), $xpath);
+    }
   }
   
   function testGetCachedData() {

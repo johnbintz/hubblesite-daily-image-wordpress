@@ -187,7 +187,7 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
   function testGetCachedData() {
     $test_time = time() + 86500;
     update_option('hubblesite-daily-image-cache', serialize(array($test_time, $this->sample_data)));
-    $this->assertEquals(array($test_time, $this->sample_data), $this->diw->_get_cached_data());
+    $this->assertEquals($this->sample_data, $this->diw->_get_cached_data());
 
     $test_time = time() - 86500;
     update_option('hubblesite-daily-image-cache', serialize(array($test_time, $this->sample_data)));
@@ -195,8 +195,6 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
 
     update_option('hubblesite-daily-image-cache', null);
     $this->assertEquals(false, $this->diw->_get_cached_data());
-    
-    $this->markTestIncomplete();
   }
 }
 

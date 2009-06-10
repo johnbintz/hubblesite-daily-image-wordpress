@@ -171,8 +171,12 @@ class DailyImageWidget {
         list($timestamp, $cached_data) = $data;
         
         if (($timestamp + $this->_cache_time) > time()) {
-          $is_valid = (count(array_intersect()) == count($this->_valid_column_names));
+          $is_valid = true;
+          foreach ($this->_valid_column_names as $field) {
+            if (!isset($cached_data[$field])) { $is_valid = false; break; }
+          }
           
+          return ($is_valid) ? $cached_data : false;
         }
       }
     }

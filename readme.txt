@@ -25,6 +25,10 @@ Turn off "HubbleSite Styles" in the Widget Options and then style the elements w
 
 `the_hubblesite_daily_image_widget()` will do just that.
 
+= What do I need to run the unit tests? =
+
+[PHPUnit](http://www.phpunit.de/) and [MockPress](http://github.com/johnbintz/mockpress/).
+
 == License ==
 
 The HubbleSite Daily Image Widget is released under the GNU GPL version 2.0 or later.

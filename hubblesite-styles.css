@@ -1,0 +1,28 @@
+div#hubblesite-daily-image {
+  text-align: center;
+  border: 1px solid #67201D;
+  background-color: #F0EEDD;
+  padding: 10px;
+}
+
+div#hubblesite-daily-image a:hover {
+  color: #00d2d3
+}
+
+div#hubblesite-daily-image img {
+  margin: 5px 0;
+  border: 1px solid #67201D;
+} 
+
+div#hubblesite-daily-image a:hover img {
+  border-color: #00d2d3
+}
+
+p#hubblesite-daily-image-header {
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  margin: 0;
+  padding: 0;
+}";

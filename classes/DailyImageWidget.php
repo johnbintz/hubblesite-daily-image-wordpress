@@ -109,6 +109,8 @@ class DailyImageWidget {
       $options = $this->get_display_options();
       
       echo '<div id="hubblesite-daily-image">';
+        echo '<p id="hubblesite-daily-image-header">HubbleSite Daily Image</p>';
+        
         if (in_array("image", $options)) {
           echo '<a href="' . $this->data['gallery_url'] . '" title="' . $this->data['title'] . '">';
             echo '<img src="' . $this->data['image_url'] . '" alt="' . $this->data['title'] . '" />';
@@ -135,9 +137,9 @@ class DailyImageWidget {
       echo '</div>';
       
       if (in_array("styles", $options)) {
-        echo '<style type="text/css">';
-          echo "div#hubblesite-daily-image { text-align: center }";
-        echo '</style>';
+        echo "<style type=\"text/css\">";
+          include(dirname(__FILE__) . '/../hubblesite-styles.css');
+        echo "</style>";
       }
     }
   }

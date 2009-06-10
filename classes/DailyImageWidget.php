@@ -249,4 +249,9 @@ class DailyImageWidget {
   }
 }
 
+function the_hubblesite_daily_image_widget() {
+  $diw = new DailyImageWidget();
+  $diw->render();
+}
+
 ?>

@@ -14,11 +14,10 @@ class DailyImageWidget {
     
     $this->has_simplexml = class_exists('SimpleXMLElement');
     
-    $this->_valid_column_names = array('title', 'caption', 'date', 'image_url', 'gallery_url', 'credits');
+    $this->_valid_column_names = array('title', 'date', 'image_url', 'gallery_url', 'credits');
     $this->_valid_options = array(
       "image"   => __("Daily Image", "hubblesite-daily-image-widget"),
       "title"   => __("Image Title", "hubblesite-daily-image-widget"),
-      "caption" => __("Image Caption", "hubblesite-daily-image-widget"),
       "credits" => __("Credits", "hubblesite-daily-image-widget"),
       "styles"  => __("HubbleSite Styles", "hubblesite-daily-image-widget"),
     );
@@ -113,7 +112,7 @@ class DailyImageWidget {
         
         if (in_array("image", $options)) {
           echo '<a href="' . $this->data['gallery_url'] . '" title="' . $this->data['title'] . '">';
-            echo '<img src="' . $this->data['image_url'] . '" alt="' . $this->data['title'] . '" />';
+            echo '<img src="' . $this->data['image_url'] . '" alt="' . $this->data['title'] . '" width="100%" />';
           echo '</a>';
         }
         
@@ -121,12 +120,6 @@ class DailyImageWidget {
           echo '<a id="hubblesite-daily-image-title" href="' . $this->data['gallery_url'] . '">';
             echo $this->data['title'];
           echo '</a>';
-        }
-
-        if (in_array("caption", $options)) {
-          echo '<div id="hubblesite-daily-image-caption">';
-            echo $this->data['caption'];
-          echo '</div>';
         }
 
         if (in_array("credits", $options)) {

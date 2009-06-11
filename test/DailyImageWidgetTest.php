@@ -15,7 +15,6 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     
     $this->sample_data = array(
       'title' => 'title',
-      'caption' => 'caption',
       'date' => '12345',
       'image_url' => 'image_url',
       'gallery_url' => 'gallery_url',
@@ -75,12 +74,6 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
         "styles",
         array(
           '//style[@type="text/css"]' => true
-        )
-      ),
-      array(
-        "caption",
-        array(
-          '//div/div[@id="hubblesite-daily-image-caption"]' => 'caption'
         )
       ),
       array(

@@ -260,22 +260,18 @@ class DailyImageWidget {
    * @return array|boolean The cached data or false upon failure.
    */
   function _get_cached_data() {
-    $result = get_option('hubblesite-daily-image-cache');
-    
-    if (is_string($result)) {
-      if (($data = @unserialize($result)) !== false) {
-        list($timestamp, $cached_data) = $data;
+    if (($result = get_option('hubblesite-daily-image-cache')) !== false) {    
+      list($timestamp, $cached_data) = $result;
+      
+      if (($timestamp + $this->_cache_time) > time()) {
+        $is_valid = true;
+        foreach ($this->_valid_column_names as $field) {
+          if (!isset($cached_data[$field])) { $is_valid = false; break; }
+        }
         
-        if (($timestamp + $this->_cache_time) > time()) {
-          $is_valid = true;
-          foreach ($this->_valid_column_names as $field) {
-            if (!isset($cached_data[$field])) { $is_valid = false; break; }
-          }
-          
-          if ($is_valid) {
-            $this->data = $cached_data;
-            return $cached_data;
-          }
+        if ($is_valid) {
+          $this->data = $cached_data;
+          return $cached_data;
         }
       }
     }

@@ -1,6 +1,14 @@
 <?php
 
+/**
+ * Show a HubbleSite daily image as a widget.
+ */
 class DailyImageWidget {
+  /**
+   * Initialize the widget.
+   * For unit testing purposes, you can disable remote data loading by passing true to this function.
+   * @param boolean $skip_load_data True if data from the remote server should not be loaded.
+   */
   function DailyImageWidget($skip_load_data = false) {
     $this->default_display_options = array(
       'title',
@@ -31,6 +39,9 @@ class DailyImageWidget {
     }
   }
   
+  /**
+   * WordPress init hook.
+   */
   function _init() {
     register_sidebar_widget(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render"));  
     register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render_ui"));  
@@ -39,6 +50,9 @@ class DailyImageWidget {
     $this->get_display_options();
   }
   
+  /**
+   * Display a warning if the connection failed.
+   */
   function _connection_warning() {
     echo "<div class=\"updated fade\">";
       _e("<strong>HubbleSite Daily Image Widget</strong> was unable to retrieve new data from HubbleSite.", "hubblesite-daily-image-widget");
@@ -46,10 +60,20 @@ class DailyImageWidget {
     echo "</div>";
   }
   
+  /**
+   * Wrapper around a remote data call for unit testing purposes.
+   * @return string The data from the remote source.
+   */
   function _get_from_data_source() {
     return @file_get_contents($this->data_source);
   }
 
+  /**
+   * Load the remote data into the object.
+   * This will try to pull from cache and, if necessary, retrieve and parse the XML from the
+   * remote server. If any of this fails, returns false.
+   * @return boolean True if data could be loaded, false otherwise.
+   */
   function _load_data() {
     if (($result = $this->_get_cached_data()) === false) {
       if (($xml_text = $this->_get_from_data_source()) !== false) {
@@ -64,6 +88,9 @@ class DailyImageWidget {
     }
   }
 
+  /**
+   * Handle updating the widget options.
+   */
   function handle_post() {
     if (isset($_POST['hubblesite']['_wpnonce'])) {
       if (wp_verify_nonce($_POST['hubblesite']['_wpnonce'], 'hubble')) {
@@ -100,6 +127,7 @@ class DailyImageWidget {
   
   /**
    * Render the widget.
+   * @param array $args The theme's widget layout arguments.
    */
   function render($args) {
     if (!empty($this->data) && is_array($this->data)) {
@@ -131,6 +159,9 @@ class DailyImageWidget {
     }
   }
   
+  /**
+   * Render the widget admin UI.
+   */
   function render_ui() {
     echo "<input type=\"hidden\" name=\"hubblesite[_wpnonce]\" value=\"" . wp_create_nonce('hubble') . "\" />";
     echo "<p>";
@@ -148,6 +179,9 @@ class DailyImageWidget {
   
   /**
    * Parse a string of XML from the HubbleSite Daily Gallery Image feed.
+   * This will try to use SimpleXML if vailable. If not, will fall back on Expat.
+   * @param string $xml_text The text to parse.
+   * @return array|boolean The retrieved data, or false on failure.
    */
   function parse_xml($xml_text) {
     if ($this->has_simplexml) {
@@ -195,10 +229,16 @@ class DailyImageWidget {
     return $this->data;
   }
   
+  /**
+   * Expat start element handler.
+   */
   function _start_element_handler($parser, $name, $attributes) {
     $this->_character_data = ""; 
   }
   
+  /**
+   * Expat end element handler.
+   */
   function _end_element_handler($parser, $name) {
     $name = strtolower($name);
     if (in_array($name, $this->_valid_column_names)) {
@@ -208,10 +248,17 @@ class DailyImageWidget {
     $this->_character_data = "";
   }
   
+  /**
+   * Expat character data handler.
+   */
   function _character_data_handler($parser, $data) {
     $this->_character_data .= $data;
   }
   
+  /**
+   * Retrieve the cached data from WP Options.
+   * @return array|boolean The cached data or false upon failure.
+   */
   function _get_cached_data() {
     $result = get_option('hubblesite-daily-image-cache');
     
@@ -235,6 +282,11 @@ class DailyImageWidget {
     return false;
   }
   
+  /**
+   * Try to ensure that no words in a paragraph or link are widowed.
+   * @param string $text The text to process.
+   * @return string The processed text.
+   */
   function _fix_widows($text) {
     return preg_replace("#([^\ ]+)\ ([^\ \>]+)($|</p>|</a>)#", '\1&nbsp;\2\3', $text);
   }

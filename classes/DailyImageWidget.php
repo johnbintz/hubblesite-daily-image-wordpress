@@ -4,8 +4,7 @@ class DailyImageWidget {
   function DailyImageWidget($skip_load_data = false) {
     $this->default_display_options = array(
       'title',
-      'image',
-      'styles'
+      'image'
     );
     
     $this->_cache_time = 86400;
@@ -18,8 +17,7 @@ class DailyImageWidget {
     $this->_valid_options = array(
       "image"   => __("Daily Image", "hubblesite-daily-image-widget"),
       "title"   => __("Image Title", "hubblesite-daily-image-widget"),
-      "credits" => __("Credits", "hubblesite-daily-image-widget"),
-      "styles"  => __("HubbleSite Styles", "hubblesite-daily-image-widget"),
+      "credits" => __("Credits", "hubblesite-daily-image-widget")
     );
     
     add_action('init', array($this, "_init"));
@@ -103,13 +101,15 @@ class DailyImageWidget {
   /**
    * Render the widget.
    */
-  function render() {
+  function render($args) {
     if (!empty($this->data) && is_array($this->data)) {
+      extract($args);
       $options = $this->get_display_options();
       
-      echo '<div id="hubblesite-daily-image">';
-        echo '<p id="hubblesite-daily-image-header">HubbleSite Daily Image</p>';
-        
+      echo $before_widget;
+        echo $before_title;
+          echo "HubbleSite Daily Image";
+        echo $after_title;
         if (in_array("image", $options)) {
           echo '<a href="' . $this->data['gallery_url'] . '" title="' . $this->data['title'] . '">';
             echo '<img src="' . $this->data['image_url'] . '" alt="' . $this->data['title'] . '" width="100%" />';
@@ -118,22 +118,16 @@ class DailyImageWidget {
         
         if (in_array("title", $options)) {
           echo '<a id="hubblesite-daily-image-title" href="' . $this->data['gallery_url'] . '">';
-            echo $this->data['title'];
+            echo $this->_fix_widows($this->data['title']);
           echo '</a>';
         }
 
         if (in_array("credits", $options)) {
           echo '<div id="hubblesite-daily-image-credits">';
-            echo $this->data['credits'];
+            echo $this->_fix_widows($this->data['credits']);
           echo '</div>';
         }
-      echo '</div>';
-      
-      if (in_array("styles", $options)) {
-        echo "<style type=\"text/css\">";
-          include(dirname(__FILE__) . '/../hubblesite-styles.css');
-        echo "</style>";
-      }
+      echo $after_widget;      
     }
   }
   
@@ -239,6 +233,10 @@ class DailyImageWidget {
       }
     }
     return false;
+  }
+  
+  function _fix_widows($text) {
+    return preg_replace("#([^\ ]+)\ ([^\ \>]+)($|</p>|</a>)#", '\1&nbsp;\2\3', $text);
   }
 }
 

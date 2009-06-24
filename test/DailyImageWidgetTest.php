@@ -59,27 +59,21 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
       array(
         "image",
         array(
-          '//div[@id="hubblesite-daily-image"]' => true,
-          '//div/a[@href="gallery_url" and @title="title"]' => true,
-          '//div/a/img[@src="image_url" and @alt="title"]' => true,
+          '//div[@id="hubblesite-daily-image"]' => false,
+          '//a[@href="gallery_url" and @title="title"]' => true,
+          '//a/img[@src="image_url" and @alt="title"]' => true,
         )
       ),
       array(
         "title",
         array(
-          '//div/a[@href="gallery_url" and @id="hubblesite-daily-image-title"]' => "title"        
-        )
-      ),
-      array(
-        "styles",
-        array(
-          '//style[@type="text/css"]' => true
+          '//a[@href="gallery_url" and @id="hubblesite-daily-image-title"]' => "title"        
         )
       ),
       array(
         "credits",
         array(
-          '//div/div[@id="hubblesite-daily-image-credits"]' => 'credits'
+          '//div[@id="hubblesite-daily-image-credits"]' => 'credits'
         )
       )
     ); 
@@ -92,7 +86,12 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     update_option('hubblesite-daily-image-options', $option_string);
     
     ob_start();
-    $this->diw->render();
+    $this->diw->render(array(
+      'before_widget' => "",
+      'after_widget' => "",
+      'before_title' => "",
+      'after_title' => ""
+    ));
     $result = ob_get_clean();
     
     $this->assertTrue(!empty($result));
@@ -105,8 +104,8 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
   
   function providerTestGetDisplayOptions() {
     return array(
-      array("", array("title", "image", "styles")),
-      array("meow", array("title", "image", "styles")),
+      array("", array("title", "image")),
+      array("meow", array("title", "image")),
       array("title", array("title")),
       array("title,image", array("title", "image")),
       array("title,meow", array("title"))
@@ -301,6 +300,14 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     
     $this->assertTrue($diw->_load_data());
     $this->assertTrue(is_array(get_option('hubblesite-daily-image-cache')));
+  }
+  
+  function testWidowProtection() {
+    $this->assertEquals("this is&nbsp;fixed", $this->diw->_fix_widows("this is fixed"));
+    $this->assertEquals("<p>this is&nbsp;fixed</p>", $this->diw->_fix_widows("<p>this is fixed</p>"));
+    $this->assertEquals("<a>this is&nbsp;fixed</a>", $this->diw->_fix_widows("<a>this is fixed</a>"));
+    $this->assertEquals("<a href='meow'>word</a>", $this->diw->_fix_widows("<a href='meow'>word</a>"));
+    $this->assertEquals("<p>this is&nbsp;fixed</p><p>Also&nbsp;fixed</p>", $this->diw->_fix_widows("<p>this is fixed</p><p>Also fixed</p>"));
   }
 }
 

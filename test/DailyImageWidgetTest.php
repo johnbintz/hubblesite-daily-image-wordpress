@@ -295,12 +295,22 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals($parse_xml_result, is_array(get_option('hubblesite-daily-image-cache')));
   }
   
-  function testWidowProtection() {
-    $this->assertEquals("this is&nbsp;fixed", $this->diw->_fix_widows("this is fixed"));
-    $this->assertEquals("<p>this is&nbsp;fixed</p>", $this->diw->_fix_widows("<p>this is fixed</p>"));
-    $this->assertEquals("<a>this is&nbsp;fixed</a>", $this->diw->_fix_widows("<a>this is fixed</a>"));
-    $this->assertEquals("<a href='meow'>word</a>", $this->diw->_fix_widows("<a href='meow'>word</a>"));
-    $this->assertEquals("<p>this is&nbsp;fixed</p><p>Also&nbsp;fixed</p>", $this->diw->_fix_widows("<p>this is fixed</p><p>Also fixed</p>"));
+  
+  function providerTestWidowProtection() {
+    return array(
+      array("this is fixed", "this is&nbsp;fixed"),
+      array("<p>this is fixed</p>" ,"<p>this is&nbsp;fixed</p>"),
+      array("<a>this is fixed</a>", "<a>this is&nbsp;fixed</a>"),
+      array("<a href='meow'>word</a>", "<a href='meow'>word</a>"),
+      array("<p>this is fixed</p><p>Also fixed</p>", '<p>this is&nbsp;fixed</p><p>Also&nbsp;fixed</p>')
+    ); 
+  }
+  
+  /**
+   * @dataProvider providerTestWidowProtection
+   */
+  function testWidowProtection($source, $result) {
+    $this->assertEquals($result, $this->diw->_fix_widows($source));
   }
 }
 

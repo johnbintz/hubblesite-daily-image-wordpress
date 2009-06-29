@@ -254,17 +254,25 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     }
   }
   
-  function testGetCachedData() {
-    $test_time = time() + 86500;
-    update_option('hubblesite-daily-image-cache', array($test_time, $this->sample_data));
-    $this->assertEquals($this->sample_data, $this->diw->_get_cached_data());
-
-    $test_time = time() - 86500;
-    update_option('hubblesite-daily-image-cache', array($test_time, $this->sample_data));
-    $this->assertEquals(false, $this->diw->_get_cached_data());
-
-    update_option('hubblesite-daily-image-cache', null);
-    $this->assertEquals(false, $this->diw->_get_cached_data());
+  function providerTestGetCachedData() {
+    return array(
+      array(time() + 86500, true),
+      array(time() - 86500, false),
+      array(null, false)
+    ); 
+  }
+  
+  /**
+   * @dataProvider providerTestGetCachedData
+   */
+  function testGetCachedData($test_time, $has_sample_data) {
+    if (!is_null($test_time)) {
+      update_option('hubblesite-daily-image-cache', array($test_time, $this->sample_data));
+    } else {
+      update_option('hubblesite-daily-image-cache', null);      
+    }
+    
+    $this->assertEquals($has_sample_data ? $this->sample_data : false, $this->diw->_get_cached_data());
   }
   
   function providerTestLoadData() {

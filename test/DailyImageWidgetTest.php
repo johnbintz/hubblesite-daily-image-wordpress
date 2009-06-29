@@ -267,39 +267,32 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(false, $this->diw->_get_cached_data());
   }
   
-  function testLoadData() {
+  function providerTestLoadData() {
+    return array(
+      array(true, null, null, true),
+      array(false, false, null, false),
+      array(false, true, false, false),
+      array(false, true, true, true)
+    ); 
+  }
+  
+  /**
+   * @dataProvider providerTestLoadData
+   */
+  function testLoadData($get_cached_data, $get_from_data_source, $parse_xml_result, $expected_return) {    
     $diw = $this->getMock('DailyImageWidget', array('_get_from_data_source', '_get_cached_data', 'parse_xml'));
-    $diw->expects($this->once())->method('_get_cached_data')->will($this->returnValue(false));
-    $diw->expects($this->once())->method('_get_from_data_source')->will($this->returnValue(false));
-    _reset_wp();
     
-    $this->assertFalse($diw->_load_data());
-    $this->assertFalse(is_array(get_option('hubblesite-daily-image-cache')));
-
-    $diw = $this->getMock('DailyImageWidget', array('_get_from_data_source', '_get_cached_data', 'parse_xml'));
-    $diw->expects($this->once())->method('_get_cached_data')->will($this->returnValue(true));
-    _reset_wp();
+    $diw->expects($this->once())->method('_get_cached_data')->will($this->returnValue($get_cached_data));
+    if ($get_cached_data == false) {
+      $diw->expects($this->once())->method('_get_from_data_source')->will($this->returnValue($get_from_data_source));
+      if ($get_from_data_source) {
+        $diw->expects($this->once())->method('parse_xml')->will($this->returnValue($parse_xml_result));
+      }
+    }
     
-    $this->assertTrue($diw->_load_data());
-    $this->assertFalse(is_array(get_option('hubblesite-daily-image-cache')));
-
-    $diw = $this->getMock('DailyImageWidget', array('_get_from_data_source', '_get_cached_data', 'parse_xml'));
-    $diw->expects($this->once())->method('_get_cached_data')->will($this->returnValue(false));
-    $diw->expects($this->once())->method('_get_from_data_source')->will($this->returnValue(true));
-    $diw->expects($this->once())->method('parse_xml')->will($this->returnValue(false));
-    _reset_wp();
+    $this->assertEquals($expected_return, $diw->_load_data());
     
-    $this->assertFalse($diw->_load_data());
-    $this->assertFalse(is_array(get_option('hubblesite-daily-image-cache')));
-
-    $diw = $this->getMock('DailyImageWidget', array('_get_from_data_source', '_get_cached_data', 'parse_xml'));
-    $diw->expects($this->once())->method('_get_cached_data')->will($this->returnValue(false));
-    $diw->expects($this->once())->method('_get_from_data_source')->will($this->returnValue(true));
-    $diw->expects($this->once())->method('parse_xml')->will($this->returnValue(true));    
-    _reset_wp();
-    
-    $this->assertTrue($diw->_load_data());
-    $this->assertTrue(is_array(get_option('hubblesite-daily-image-cache')));
+    $this->assertEquals($parse_xml_result, is_array(get_option('hubblesite-daily-image-cache')));
   }
   
   function testWidowProtection() {

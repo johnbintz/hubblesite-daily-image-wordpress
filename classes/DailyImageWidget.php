@@ -16,7 +16,8 @@ class DailyImageWidget {
     );
     
     $this->_cache_time = 86400;
-    
+    $this->_source_stamp = "&amp;f=wpw";
+
     $this->data_source = "http://hubblesite.org/gallery/album/daily_image.php";
     
     $this->has_simplexml = class_exists('SimpleXMLElement');
@@ -29,22 +30,22 @@ class DailyImageWidget {
     );
     
     add_action('init', array($this, "_init"));
-    
-    if (!$skip_load_data) {
-      if (!$this->_load_data()) {
-        add_action("admin_notices", array($this, "_connection_warning"));
-      }
-    } else {
-      $this->data = false;
-    }
   }
   
   /**
    * WordPress init hook.
    */
   function _init() {
-    register_sidebar_widget(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render"));  
-    register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render_ui"));  
+    register_sidebar_widget(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array(&$this, "render"));  
+    register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array(&$this, "render_ui"));  
+
+    if (!$skip_load_data) {
+      if (!$this->_load_data()) {
+        add_action("admin_notices", array(&$this, "_connection_warning"));
+      }
+    } else {
+      $this->data = false;
+    }
     
     $this->handle_post();
     $this->get_display_options();
@@ -147,13 +148,13 @@ class DailyImageWidget {
           echo "HubbleSite Daily Image";
         echo $after_title;
         if (in_array("image", $options)) {
-          echo '<a href="' . $this->data['gallery_url'] . '" title="' . $this->data['title'] . '">';
+          echo '<a href="' . $this->data['gallery_url'] . $this->_source_stamp . '" title="' . $this->data['title'] . '">';
             echo '<img src="' . $this->data['image_url'] . '" alt="' . $this->data['title'] . '" width="100%" />';
           echo '</a>';
         }
         
         if (in_array("title", $options)) {
-          echo '<a id="hubblesite-daily-image-title" href="' . $this->data['gallery_url'] . '">';
+          echo '<a id="hubblesite-daily-image-title" href="' . $this->data['gallery_url'] . $this->_source_stamp . '">';
             echo $this->_fix_widows($this->data['title']);
           echo '</a>';
         }
@@ -192,46 +193,20 @@ class DailyImageWidget {
    * @return array|boolean The retrieved data, or false on failure.
    */
   function parse_xml($xml_text) {
-    if ($this->has_simplexml) {
-      try {
-        $xml = new SimpleXMLElement($xml_text);
-
-        if ($xml !== false) {
-          $data = array();
-          $is_valid = true;
-          foreach ($this->_valid_column_names as $node) {
-            if ($xml->{$node}) {
-              $data[$node] = (string)$xml->{$node}; 
-            } else {
-              $is_valid = false; break; 
-            }
-          }
-          
-          if ($is_valid) {
-            $this->data = $data; 
-          } else {
-            $this->data = false; 
-          }
-        }
-      } catch (Exception $e) {
-        $this->data = false; 
-      }
-    } else {
-      $parser = xml_parser_create();
-      $this->_character_data = "";
-      $this->_xml_data = array();
-      xml_set_element_handler(
-        $parser,
-        array($this, "_start_element_handler"),
-        array($this, "_end_element_handler")
-      );
-      xml_set_character_data_handler($parser, array($this, "_character_data_handler"));
-      xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
-      $this->data = false;
-      if (xml_parse($parser, $xml_text)) {
-        if (count($this->_xml_data) == count($this->_valid_column_names)) {
-          $this->data = $this->_xml_data; 
-        }
+    $parser = xml_parser_create();
+    $this->_character_data = "";
+    $this->_xml_data = array();
+    xml_set_element_handler(
+      $parser,
+      array(&$this, "_start_element_handler"),
+      array(&$this, "_end_element_handler")
+    );
+    xml_set_character_data_handler($parser, array(&$this, "_character_data_handler"));
+    xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+    $this->data = false;
+    if (xml_parse($parser, $xml_text)) {
+      if (count($this->_xml_data) == count($this->_valid_column_names)) {
+        $this->data = $this->_xml_data; 
       }
     }
     return $this->data;

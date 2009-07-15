@@ -60,14 +60,14 @@ class DailyImageWidgetTest extends PHPUnit_Framework_TestCase {
         "image",
         array(
           '//div[@id="hubblesite-daily-image"]' => false,
-          '//a[@href="gallery_url" and @title="title"]' => true,
+          '//a[@href="gallery_url&f=wpw" and @title="title"]' => true,
           '//a/img[@src="image_url" and @alt="title"]' => true,
         )
       ),
       array(
         "title",
         array(
-          '//a[@href="gallery_url" and @id="hubblesite-daily-image-title"]' => "title"        
+          '//a[@href="gallery_url&f=wpw" and @id="hubblesite-daily-image-title"]' => "title"        
         )
       ),
       array(

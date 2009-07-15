@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://comicpress.local/" />
+<title>DailyImageWidgetTest</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">DailyImageWidgetTest</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/wp-admin/</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Installed</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//a[contains(@href, 'action=activate') and contains(@href, 'hubblesite-daily-image-wordpress')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>Plugin activated.</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Widgets</td>
+	<td></td>
+</tr>
+<!--Version check-->
+<tr>
+	<td>storeText</td>
+	<td>footer-upgrade</td>
+	<td>wp_version</td>
+</tr>
+<tr>
+	<td>getEval</td>
+	<td>/Version ([0-9.]+)/.test(storedVars['wp_version']); storedVars['wp_version'] = RegExp.$1;</td>
+	<td></td>
+</tr>
+<tr>
+	<td>gotoIf</td>
+	<td>storedVars['wp_version'] &lt; 2.8</td>
+	<td>wordpress_27</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//a[contains(@href,'hubblesite-daily-image') and contains(@href,'addnew')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>Warning: in_array()</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>//input[@name=&quot;hubblesite[image]&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>//input[@name=&quot;hubblesite[title]&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>uncheck</td>
+	<td>//input[@name=&quot;hubblesite[credits]&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>savewidget</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>//div[@id='widgets-right']//h4[contains(text(),&quot;HubbleSite Daily Image&quot;)]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>site-visit-button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//li[@id='hubblesite-daily-image']/h2</td>
+	<td>HubbleSite Daily Image</td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>//li[@id='hubblesite-daily-image']/a[contains(@href,'hubblesite.org/gallery/album')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>storeAttribute</td>
+	<td>//li[@id='hubblesite-daily-image']/a[contains(@href,'hubblesite.org/gallery/album')]@title</td>
+	<td>title</td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>//li[@id='hubblesite-daily-image']//img[contains(@src,'imgsrc.hubblesite.org') and @alt=&quot;${title}&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>goBackAndWait</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//div[@id='widgets-right']//div[contains(@id, 'hubblesite-daily-image')]//a[contains(@class, 'widget-action')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>uncheck</td>
+	<td>//input[@name=&quot;hubblesite[title]&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>//input[@name=&quot;hubblesite[credits]&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//div[contains(@id, 'hubblesite-daily-image')]//input[@type='submit']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>site-visit-button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>//div[@id=&quot;hubblesite-daily-image-credits&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>goBackAndWait</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//div[@id='widgets-right']//div[contains(@id, 'hubblesite-daily-image')]//a[contains(@class, 'widget-action')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//div[@id='widgets-right']//div[contains(@id, 'hubblesite-daily-image')]//a[@class=&quot;widget-control-remove&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementNotPresent</td>
+	<td>//div[@id='widgets-right']//div[contains(@id, 'hubblesite-daily-image')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>label</td>
+	<td>wordpress_27</td>
+	<td></td>
+</tr>
+<!--Deactivate plugin-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Installed</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//a[contains(@href,'deactivate') and contains(@href,'hubblesite-daily-image-wordpress')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>Plugin deactivated.</td>
+	<td></td>
+</tr>
+
+</tbody></table>
+</body>
+</html>

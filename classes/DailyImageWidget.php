@@ -50,7 +50,15 @@ class DailyImageWidget {
   }
   
   function _get_from_data_source() {
-    return @file_get_contents($this->data_source);
+    if (extension_loaded('curl')) {
+      $ch = curl_init($this->data_source);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+      $result = curl_exec($ch);
+      curl_close($ch);
+      return $result;
+    } else {
+      return @file_get_contents($this->data_source);
+    }
   }
 
   function _load_data() {

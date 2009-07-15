@@ -1,8 +1,12 @@
 div#hubblesite-daily-image {
   text-align: center;
-  border: 1px solid #67201D;
-  background-color: #F0EEDD;
+  border: 1px solid #6B7595;
+  background-color: #191D28;
   padding: 10px;
+}
+
+div#hubblesite-daily-image a {
+  color: #D1D184 
 }
 
 div#hubblesite-daily-image a:hover {
@@ -11,7 +15,7 @@ div#hubblesite-daily-image a:hover {
 
 div#hubblesite-daily-image img {
   margin: 5px 0;
-  border: 1px solid #67201D;
+  border: 1px solid #6B7595;
 } 
 
 div#hubblesite-daily-image a:hover img {
@@ -22,7 +26,11 @@ p#hubblesite-daily-image-header {
   text-align: center;
   font-size: 12px;
   font-weight: bold;
-  color: #666;
+  color: #9FA6BA;
   margin: 0;
   padding: 0;
+}
+
+div#hubblesite-daily-image-credits {
+  color: #CCCCCC 
 }

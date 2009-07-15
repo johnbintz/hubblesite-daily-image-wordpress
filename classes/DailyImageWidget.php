@@ -1,11 +1,18 @@
 <?php
 
+/**
+ * Show a HubbleSite daily image as a widget.
+ */
 class DailyImageWidget {
+  /**
+   * Initialize the widget.
+   * For unit testing purposes, you can disable remote data loading by passing true to this function.
+   * @param boolean $skip_load_data True if data from the remote server should not be loaded.
+   */
   function DailyImageWidget($skip_load_data = false) {
     $this->default_display_options = array(
       'title',
-      'image',
-      'styles'
+      'image'
     );
     
     $this->_cache_time = 86400;
@@ -14,13 +21,11 @@ class DailyImageWidget {
     
     $this->has_simplexml = class_exists('SimpleXMLElement');
     
-    $this->_valid_column_names = array('title', 'caption', 'date', 'image_url', 'gallery_url', 'credits');
+    $this->_valid_column_names = array('title', 'date', 'image_url', 'gallery_url', 'credits');
     $this->_valid_options = array(
       "image"   => __("Daily Image", "hubblesite-daily-image-widget"),
       "title"   => __("Image Title", "hubblesite-daily-image-widget"),
-      "caption" => __("Image Caption", "hubblesite-daily-image-widget"),
-      "credits" => __("Credits", "hubblesite-daily-image-widget"),
-      "styles"  => __("HubbleSite Styles", "hubblesite-daily-image-widget"),
+      "credits" => __("Credits", "hubblesite-daily-image-widget")
     );
     
     add_action('init', array($this, "_init"));
@@ -34,6 +39,9 @@ class DailyImageWidget {
     }
   }
   
+  /**
+   * WordPress init hook.
+   */
   function _init() {
     register_sidebar_widget(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render"));  
     register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array($this, "render_ui"));  
@@ -42,6 +50,9 @@ class DailyImageWidget {
     $this->get_display_options();
   }
   
+  /**
+   * Display a warning if the connection failed.
+   */
   function _connection_warning() {
     echo "<div class=\"updated fade\">";
       _e("<strong>HubbleSite Daily Image Widget</strong> was unable to retrieve new data from HubbleSite.", "hubblesite-daily-image-widget");
@@ -49,6 +60,10 @@ class DailyImageWidget {
     echo "</div>";
   }
   
+  /**
+   * Wrapper around a remote data call for unit testing purposes.
+   * @return string The data from the remote source.
+   */
   function _get_from_data_source() {
     if (extension_loaded('curl')) {
       $ch = curl_init($this->data_source);
@@ -61,6 +76,12 @@ class DailyImageWidget {
     }
   }
 
+  /**
+   * Load the remote data into the object.
+   * This will try to pull from cache and, if necessary, retrieve and parse the XML from the
+   * remote server. If any of this fails, returns false.
+   * @return boolean True if data could be loaded, false otherwise.
+   */
   function _load_data() {
     if (($result = $this->_get_cached_data()) === false) {
       if (($xml_text = $this->_get_from_data_source()) !== false) {
@@ -75,6 +96,9 @@ class DailyImageWidget {
     }
   }
 
+  /**
+   * Handle updating the widget options.
+   */
   function handle_post() {
     if (isset($_POST['hubblesite']['_wpnonce'])) {
       if (wp_verify_nonce($_POST['hubblesite']['_wpnonce'], 'hubble')) {
@@ -111,47 +135,41 @@ class DailyImageWidget {
   
   /**
    * Render the widget.
+   * @param array $args The theme's widget layout arguments.
    */
-  function render() {
+  function render($args) {
     if (!empty($this->data) && is_array($this->data)) {
+      extract($args);
       $options = $this->get_display_options();
       
-      echo '<div id="hubblesite-daily-image">';
-        echo '<p id="hubblesite-daily-image-header">HubbleSite Daily Image</p>';
-        
+      echo $before_widget;
+        echo $before_title;
+          echo "HubbleSite Daily Image";
+        echo $after_title;
         if (in_array("image", $options)) {
           echo '<a href="' . $this->data['gallery_url'] . '" title="' . $this->data['title'] . '">';
-            echo '<img src="' . $this->data['image_url'] . '" alt="' . $this->data['title'] . '" />';
+            echo '<img src="' . $this->data['image_url'] . '" alt="' . $this->data['title'] . '" width="100%" />';
           echo '</a>';
         }
         
         if (in_array("title", $options)) {
           echo '<a id="hubblesite-daily-image-title" href="' . $this->data['gallery_url'] . '">';
-            echo $this->data['title'];
+            echo $this->_fix_widows($this->data['title']);
           echo '</a>';
-        }
-
-        if (in_array("caption", $options)) {
-          echo '<div id="hubblesite-daily-image-caption">';
-            echo $this->data['caption'];
-          echo '</div>';
         }
 
         if (in_array("credits", $options)) {
           echo '<div id="hubblesite-daily-image-credits">';
-            echo $this->data['credits'];
+            echo $this->_fix_widows($this->data['credits']);
           echo '</div>';
         }
-      echo '</div>';
-      
-      if (in_array("styles", $options)) {
-        echo "<style type=\"text/css\">";
-          include(dirname(__FILE__) . '/../hubblesite-styles.css');
-        echo "</style>";
-      }
+      echo $after_widget;      
     }
   }
   
+  /**
+   * Render the widget admin UI.
+   */
   function render_ui() {
     echo "<input type=\"hidden\" name=\"hubblesite[_wpnonce]\" value=\"" . wp_create_nonce('hubble') . "\" />";
     echo "<p>";
@@ -169,6 +187,9 @@ class DailyImageWidget {
   
   /**
    * Parse a string of XML from the HubbleSite Daily Gallery Image feed.
+   * This will try to use SimpleXML if vailable. If not, will fall back on Expat.
+   * @param string $xml_text The text to parse.
+   * @return array|boolean The retrieved data, or false on failure.
    */
   function parse_xml($xml_text) {
     if ($this->has_simplexml) {
@@ -216,10 +237,16 @@ class DailyImageWidget {
     return $this->data;
   }
   
+  /**
+   * Expat start element handler.
+   */
   function _start_element_handler($parser, $name, $attributes) {
     $this->_character_data = ""; 
   }
   
+  /**
+   * Expat end element handler.
+   */
   function _end_element_handler($parser, $name) {
     $name = strtolower($name);
     if (in_array($name, $this->_valid_column_names)) {
@@ -229,31 +256,43 @@ class DailyImageWidget {
     $this->_character_data = "";
   }
   
+  /**
+   * Expat character data handler.
+   */
   function _character_data_handler($parser, $data) {
     $this->_character_data .= $data;
   }
   
+  /**
+   * Retrieve the cached data from WP Options.
+   * @return array|boolean The cached data or false upon failure.
+   */
   function _get_cached_data() {
-    $result = get_option('hubblesite-daily-image-cache');
-    
-    if (is_string($result)) {
-      if (($data = @unserialize($result)) !== false) {
-        list($timestamp, $cached_data) = $data;
+    if (($result = get_option('hubblesite-daily-image-cache')) !== false) {    
+      list($timestamp, $cached_data) = $result;
+      
+      if (($timestamp + $this->_cache_time) > time()) {
+        $is_valid = true;
+        foreach ($this->_valid_column_names as $field) {
+          if (!isset($cached_data[$field])) { $is_valid = false; break; }
+        }
         
-        if (($timestamp + $this->_cache_time) > time()) {
-          $is_valid = true;
-          foreach ($this->_valid_column_names as $field) {
-            if (!isset($cached_data[$field])) { $is_valid = false; break; }
-          }
-          
-          if ($is_valid) {
-            $this->data = $cached_data;
-            return $cached_data;
-          }
+        if ($is_valid) {
+          $this->data = $cached_data;
+          return $cached_data;
         }
       }
     }
     return false;
+  }
+  
+  /**
+   * Try to ensure that no words in a paragraph or link are widowed.
+   * @param string $text The text to process.
+   * @return string The processed text.
+   */
+  function _fix_widows($text) {
+    return preg_replace("#([^\ ]+)\ ([^\ \>]+)($|</p>|</a>)#", '\1&nbsp;\2\3', $text);
   }
 }
 

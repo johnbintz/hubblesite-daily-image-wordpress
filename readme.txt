@@ -13,7 +13,7 @@ This widget will let you embed and show a beautiful image from the Hubble Space 
 
 == Installation ==
 
-Copy the hubblesite-daily-image-widget directory to your wp-content/plugins/ directory and activate the plugin. The widget will appear on the Appearance -> Widgets screen. Embed the widget in one of your sidebars and change the widget options to show or hide different parts of the widget.
+Copy the hubblesite-daily-image directory to your wp-content/plugins/ directory and activate the plugin. The widget will appear on the Appearance -> Widgets screen. Embed the widget in one of your sidebars and change the widget options to show or hide different parts of the widget.
 
 == Frequently Asked Questions ==
 

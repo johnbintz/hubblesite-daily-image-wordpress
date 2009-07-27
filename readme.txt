@@ -17,13 +17,11 @@ Copy the hubblesite-daily-image-widget directory to your wp-content/plugins/ dir
 
 == Frequently Asked Questions ==
 
-= How do I style the widget myself? =
-
-Turn off "HubbleSite Styles" in the Widget Options and then style the elements with your theme's CSS file.
-
 = I don't use dynamic sidebars. Is there a template tag I can use to embed the widget? =
 
-`the_hubblesite_daily_image_widget()` will do just that.
+`the_hubblesite_daily_image_widget()`
+
+will do just that.
 
 = What do I need to run the unit tests? =
 

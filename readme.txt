@@ -1,8 +1,8 @@
-=== HubbleSite Daily Image WIdget ===
+=== HubbleSite Daily Image Widget ===
 Contributors: johncoswell
 Tags: widget, picture, image
 Requires at least: 2.7.1
-Tested up to: 2.7.1
+Tested up to: 2.8
 Stable tag: 0.1
 
 The HubbleSite Daily Image Widget embeds a daily HubbleSite Gallery image on your WordPress blog.

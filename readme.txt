@@ -9,7 +9,7 @@ The HubbleSite Daily Image Widget embeds a daily HubbleSite Gallery image on you
 
 == Description ==
 
-This widget will let you embed and show a beautiful image from the Hubble Space Telescope every day of the year. The image changes daily, and you can choose to show all sorts of other information about the image within the widget, as well.
+Use this widget to embed a new, stunning Hubble Space Telescope image each day of the year. The image changes daily. You can choose to include information about the image within the widget as well.
 
 == Installation ==
 

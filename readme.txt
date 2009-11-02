@@ -13,7 +13,7 @@ Use this widget to embed a new, stunning Hubble Space Telescope image each day o
 
 == Installation ==
 
-Copy the hubblesite-daily-image directory to your wp-content/plugins/ directory and activate the plugin. The widget will appear on the Appearance -> Widgets screen. Embed the widget in one of your sidebars and change the widget options to show or hide different parts of the widget.
+Copy the `hubblesite-daily-image` directory to your `wp-content/plugins/` directory and activate the plugin. The widget will appear on the Appearance -> Widgets screen. Embed the widget in one of your sidebars and change the widget options to show or hide different parts of the widget.
 
 == Frequently Asked Questions ==
 
@@ -26,6 +26,14 @@ will do just that.
 = What do I need to run the unit tests? =
 
 [PHPUnit](http://www.phpunit.de/) and [MockPress](http://github.com/johnbintz/mockpress/).
+
+== Changelog ==
+
+= 0.1.1 =
+* Use WordPress's HTTP download routines instead of our own.
+
+= 0.1 =
+* Initial release
 
 == License ==
 

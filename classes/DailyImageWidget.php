@@ -36,7 +36,14 @@ class DailyImageWidget {
    * WordPress init hook.
    */
   function _init() {
-    register_sidebar_widget(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array(&$this, "render"));  
+    wp_register_sidebar_widget(
+      'hubblesite-daily-image',
+      __("HubbleSite Daily Image", "hubblesite-daily-image-widget"),
+      array(&$this, "render"),
+      array(
+        'description' => __('Embed a daily HubbleSite Gallery image on your WordPress blog.', 'hubblesite-daily-image-widget')
+      )
+    );
     register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array(&$this, "render_ui"));  
 
     if (!$skip_load_data) {
@@ -66,15 +73,13 @@ class DailyImageWidget {
    * @return string The data from the remote source.
    */
   function _get_from_data_source() {
-    if (extension_loaded('curl')) {
-      $ch = curl_init($this->data_source);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-      $result = curl_exec($ch);
-      curl_close($ch);
-      return $result;
-    } else {
-      return @file_get_contents($this->data_source);
+    $response = wp_remote_request($this->data_source, array('method' => 'GET'));
+    if (!is_wp_error($response)) {
+      if (isset($response['body'])) {
+        return $response['body']; 
+      } 
     }
+    return false;
   }
 
   /**

@@ -3,7 +3,7 @@
 Plugin Name: HubbleSite Daily Image Widget
 Plugin URI: http://github.com/johnbintz/hubblesite-daily-image-wordpress/tree/master
 Description: The HubbleSite Daily Image Widget embeds a daily HubbleSite Gallery image on your WordPress blog. 
-Version: 0.1
+Version: 0.1.1
 Author: John Bintz
 Author URI: http://hubblesite.org/
 

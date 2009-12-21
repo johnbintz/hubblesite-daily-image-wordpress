@@ -4,6 +4,8 @@
  * Show a HubbleSite daily image as a widget.
  */
 class DailyImageWidget {
+	var $display_options = array();
+
   /**
    * Initialize the widget.
    * For unit testing purposes, you can disable remote data loading by passing true to this function.
@@ -14,24 +16,24 @@ class DailyImageWidget {
       'title',
       'image'
     );
-    
+
     $this->_cache_time = 86400;
     $this->_source_stamp = "&amp;f=wpw";
 
     $this->data_source = "http://hubblesite.org/gallery/album/daily_image.php";
-    
+
     $this->has_simplexml = class_exists('SimpleXMLElement');
-    
+
     $this->_valid_column_names = array('title', 'date', 'image_url', 'gallery_url', 'credits');
     $this->_valid_options = array(
       "image"   => __("Daily Image", "hubblesite-daily-image-widget"),
       "title"   => __("Image Title", "hubblesite-daily-image-widget"),
       "credits" => __("Credits", "hubblesite-daily-image-widget")
     );
-    
+
     add_action('init', array($this, "_init"));
   }
-  
+
   /**
    * WordPress init hook.
    */
@@ -44,7 +46,7 @@ class DailyImageWidget {
         'description' => __('Embed a daily HubbleSite Gallery image on your WordPress blog.', 'hubblesite-daily-image-widget')
       )
     );
-    register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array(&$this, "render_ui"));  
+    register_widget_control(__("HubbleSite Daily Image", "hubblesite-daily-image-widget"), array(&$this, "render_ui"));
 
     if (!$skip_load_data) {
       if (!$this->_load_data()) {
@@ -53,11 +55,11 @@ class DailyImageWidget {
     } else {
       $this->data = false;
     }
-    
+
     $this->handle_post();
     $this->get_display_options();
   }
-  
+
   /**
    * Display a warning if the connection failed.
    */
@@ -67,7 +69,7 @@ class DailyImageWidget {
       _e("The widget will appear as empty in your site until data can be downloaded again.", "hubblesite-daily-image-widget");
     echo "</div>";
   }
-  
+
   /**
    * Wrapper around a remote data call for unit testing purposes.
    * @return string The data from the remote source.
@@ -76,8 +78,8 @@ class DailyImageWidget {
     $response = wp_remote_request($this->data_source, array('method' => 'GET'));
     if (!is_wp_error($response)) {
       if (isset($response['body'])) {
-        return $response['body']; 
-      } 
+        return $response['body'];
+      }
     }
     return false;
   }
@@ -129,7 +131,7 @@ class DailyImageWidget {
     if (!empty($display_options)) {
       $this->display_options = array_intersect(explode(",", $display_options), array_keys($this->_valid_options));
     }
-    
+
     if (empty($this->display_options)) {
       $this->display_options = $this->default_display_options;
     }
@@ -138,16 +140,16 @@ class DailyImageWidget {
 
     return $this->display_options;
   }
-  
+
   /**
    * Render the widget.
    * @param array $args The theme's widget layout arguments.
    */
-  function render($args) {
+  function render($args = array()) {
     if (!empty($this->data) && is_array($this->data)) {
       extract($args);
       $options = $this->get_display_options();
-      
+
       echo $before_widget;
         echo $before_title;
           echo "HubbleSite Daily Image";
@@ -157,7 +159,7 @@ class DailyImageWidget {
             echo '<img src="' . $this->data['image_url'] . '" alt="' . $this->data['title'] . '" width="100%" />';
           echo '</a>';
         }
-        
+
         if (in_array("title", $options)) {
           echo '<a id="hubblesite-daily-image-title" href="' . $this->data['gallery_url'] . $this->_source_stamp . '">';
             echo $this->_fix_widows($this->data['title']);
@@ -169,10 +171,10 @@ class DailyImageWidget {
             echo $this->_fix_widows($this->data['credits']);
           echo '</div>';
         }
-      echo $after_widget;      
+      echo $after_widget;
     }
   }
-  
+
   /**
    * Render the widget admin UI.
    */
@@ -181,7 +183,7 @@ class DailyImageWidget {
     echo "<p>";
       _e("Show on Widget <em>(must select at least one)</em>:", "hubblesite-daily-image-widget");
     echo "</p>";
-    
+
     foreach ($this->_valid_options as $option => $label) {
       echo "<label>";
         echo "<input type=\"checkbox\" name=\"hubblesite[${option}]\" " . (in_array($option, $this->display_options) ? "checked=\"checked\"" : "") . "/> ";
@@ -190,7 +192,7 @@ class DailyImageWidget {
       echo "<br />";
     }
   }
-  
+
   /**
    * Parse a string of XML from the HubbleSite Daily Gallery Image feed.
    * This will try to use SimpleXML if vailable. If not, will fall back on Expat.
@@ -211,19 +213,19 @@ class DailyImageWidget {
     $this->data = false;
     if (xml_parse($parser, $xml_text)) {
       if (count($this->_xml_data) == count($this->_valid_column_names)) {
-        $this->data = $this->_xml_data; 
+        $this->data = $this->_xml_data;
       }
     }
     return $this->data;
   }
-  
+
   /**
    * Expat start element handler.
    */
   function _start_element_handler($parser, $name, $attributes) {
-    $this->_character_data = ""; 
+    $this->_character_data = "";
   }
-  
+
   /**
    * Expat end element handler.
    */
@@ -232,31 +234,31 @@ class DailyImageWidget {
     if (in_array($name, $this->_valid_column_names)) {
       $this->_xml_data[$name] = $this->_character_data;
     }
-              
+
     $this->_character_data = "";
   }
-  
+
   /**
    * Expat character data handler.
    */
   function _character_data_handler($parser, $data) {
     $this->_character_data .= $data;
   }
-  
+
   /**
    * Retrieve the cached data from WP Options.
    * @return array|boolean The cached data or false upon failure.
    */
   function _get_cached_data() {
-    if (($result = get_option('hubblesite-daily-image-cache')) !== false) {    
+    if (($result = get_option('hubblesite-daily-image-cache')) !== false) {
       list($timestamp, $cached_data) = $result;
-      
+
       if (($timestamp + $this->_cache_time) > time()) {
         $is_valid = true;
         foreach ($this->_valid_column_names as $field) {
           if (!isset($cached_data[$field])) { $is_valid = false; break; }
         }
-        
+
         if ($is_valid) {
           $this->data = $cached_data;
           return $cached_data;
@@ -265,7 +267,7 @@ class DailyImageWidget {
     }
     return false;
   }
-  
+
   /**
    * Try to ensure that no words in a paragraph or link are widowed.
    * @param string $text The text to process.

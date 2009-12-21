@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head profile="http://selenium-ide.openqa.org/profiles/test-case">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link rel="selenium.base" href="http://wordpress27.local/" />
+<link rel="selenium.base" href="http://comicpress.local/" />
 <title>DailyImageWidgetTest</title>
 </head>
 <body>
@@ -99,22 +99,22 @@
 </tr>
 <tr>
 	<td>assertText</td>
-	<td>//li[@id='hubblesite-daily-image']/h2</td>
+	<td>//*[@id='hubblesite-daily-image']/h2</td>
 	<td>HubbleSite Daily Image</td>
 </tr>
 <tr>
 	<td>assertElementPresent</td>
-	<td>//li[@id='hubblesite-daily-image']/a[contains(@href,'hubblesite.org/gallery/album')]</td>
+	<td>//*[@id='hubblesite-daily-image']/a[contains(@href,'hubblesite.org/gallery/album')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>storeAttribute</td>
-	<td>//li[@id='hubblesite-daily-image']/a[contains(@href,'hubblesite.org/gallery/album')]@title</td>
+	<td>//*[@id='hubblesite-daily-image']/a[contains(@href,'hubblesite.org/gallery/album')]@title</td>
 	<td>title</td>
 </tr>
 <tr>
 	<td>assertElementPresent</td>
-	<td>//li[@id='hubblesite-daily-image']//img[contains(@src,'imgsrc.hubblesite.org') and @alt=&quot;${title}&quot;]</td>
+	<td>//*[@id='hubblesite-daily-image']//img[contains(@src,'imgsrc.hubblesite.org') and @alt=&quot;${title}&quot;]</td>
 	<td></td>
 </tr>
 <tr>
@@ -129,12 +129,12 @@
 </tr>
 <tr>
 	<td>uncheck</td>
-	<td>//input[@name=&quot;hubblesite[title]&quot;]</td>
+	<td>//div[@id='widgets-right']//div[contains(@id,'hubblesite-daily-image')]//input[contains(@name, 'title')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>check</td>
-	<td>//input[@name=&quot;hubblesite[credits]&quot;]</td>
+	<td>//div[@id='widgets-right']//div[contains(@id,'hubblesite-daily-image')]//input[contains(@name, 'credits')]</td>
 	<td></td>
 </tr>
 <tr>

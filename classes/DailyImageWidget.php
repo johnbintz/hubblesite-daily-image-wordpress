@@ -37,6 +37,7 @@ class DailyImageWidget {
   /**
    * WordPress init hook.
    */
+  // @codeCoverageIgnoreStart
   function _init() {
     wp_register_sidebar_widget(
       'hubblesite-daily-image',
@@ -59,21 +60,25 @@ class DailyImageWidget {
     $this->handle_post();
     $this->get_display_options();
   }
+  // @codeCoverageIgnoreEnd
 
   /**
    * Display a warning if the connection failed.
    */
+  // @codeCoverageIgnoreStart
   function _connection_warning() {
     echo "<div class=\"updated fade\">";
       _e("<strong>HubbleSite Daily Image Widget</strong> was unable to retrieve new data from HubbleSite.", "hubblesite-daily-image-widget");
       _e("The widget will appear as empty in your site until data can be downloaded again.", "hubblesite-daily-image-widget");
     echo "</div>";
   }
+  // @codeCoverageIgnoreEnd
 
   /**
    * Wrapper around a remote data call for unit testing purposes.
    * @return string The data from the remote source.
    */
+  // @codeCoverageIgnoreStart
   function _get_from_data_source() {
     $response = wp_remote_request($this->data_source, array('method' => 'GET'));
     if (!is_wp_error($response)) {
@@ -83,6 +88,7 @@ class DailyImageWidget {
     }
     return false;
   }
+  // @codeCoverageIgnoreEnd
 
   /**
    * Load the remote data into the object.
@@ -278,9 +284,9 @@ class DailyImageWidget {
   }
 }
 
+// @codeCoverageIgnoreStart
 function the_hubblesite_daily_image_widget() {
   $diw = new DailyImageWidget();
   $diw->render();
 }
-
-?>
+// @codeCoverageIgnoreEnd
